@@ -5,8 +5,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import networkx as nx
 import random
+import time
 
-file = pd.ExcelFile("../data/InputDataTelecomLargeInstance.xlsx")
+file = pd.ExcelFile("../data/InputDataTelecomSmallInstance.xlsx")
 
 ### Importation des données
 C = pd.read_excel(file, 'C').columns[0]
@@ -327,9 +328,9 @@ def add(type):
 
 
 
-def diversify(i):
+def diversify(i, Aadd):
     bound = [C, M, N]
-    for j in range(i//2): add(random.randint(0, 1)*2)
+    for j in range(int(i*Aadd)): add(random.randint(0, 1)*2)
     for j in range(i):
         type = random.randint(0, 2)
         swap(type, random.randint(0, bound[type]-1), random.randint(0, bound[type]-1))
@@ -337,11 +338,15 @@ def diversify(i):
 printState()
 print("-------------------------Calculating-------------------------")
 
-stuckLimit = 3500
+stuckLimit = 2500
 minScore = cost()
 saveState()
 minState = state
-iter = 1000000
+iter = 10000000
+Nswap = 20
+Aadd = 0.5
+
+start_time = time.time()
 
 for i in range(iter):
 
@@ -392,7 +397,7 @@ for i in range(iter):
             minScore = currentScore
             saveState()
             minState = state.copy()
-        diversify(20)
+        diversify(Nswap, Aadd)
         stuck = 0
 
 def graph(c, m, n):
@@ -444,9 +449,9 @@ print("")
 
 state = minState
 print(minState)
-print(state)
 loadState()
 printState()
+print("Running time : %s seconds" % (time.time() - start_time))
 graph(np.array(CtoEO)+1, np.array(EOtoH)+1, np.array(RingH)+1)
 plt.figure()
 plt.plot([i for i in range(len(costHistory))], costHistory)
